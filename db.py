@@ -1,7 +1,6 @@
 import psycopg2
 
 def get_db_connection():
-    # This code is from your project plan 
     return psycopg2.connect(
         dbname="news",
         user="postgres",

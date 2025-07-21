@@ -6,3 +6,4 @@
 .env
 __pycache__/cli.cpython-313.pyc
 pg_hba.conf
+__pycache__/db.cpython-313.pyc
