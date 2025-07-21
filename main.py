@@ -1,6 +1,8 @@
-def main():
-    print("Hello from tech-news-bot!")
+from cli import cli, ping, help
 
+def main():
+    print("Hello from the tech news bot!")
 
 if __name__ == "__main__":
     main()
+    cli()
