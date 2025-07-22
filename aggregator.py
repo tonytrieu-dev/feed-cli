@@ -1,13 +1,17 @@
 import feedparser
 from db import get_db_connection
 
-def fetch_substack():
-    feed = feedparser.parse("https://addyo.substack.com/feed")
-    articles = [
-        {"title": entry.title, "content": entry.summary, "source": "Substack", "url": entry.link}
-        for entry in feed.entries
-    ]
-    return articles
+def fetch_rss_feeds(feed_urls):
+    all_articles = []
+    for url in feed_urls:
+        feed = feedparser.parse(url)
+        articles = [
+            {"title": entry.title, "content": entry.summary, "source": url.split('//')[1].split('/')[0], "url": entry.link}
+            for entry in feed.entries
+        ]
+        all_articles.extend(articles)
+    return all_articles
+
 
 def add_to_db(articles):
     connection = get_db_connection()
@@ -27,6 +31,7 @@ def add_to_db(articles):
     cursor.close()
     connection.close()
 
+
 def check_articles():
     connection = get_db_connection()
     cursor = connection.cursor()
@@ -37,8 +42,9 @@ def check_articles():
     cursor.close()
     connection.close()
 
+
 if __name__ == "__main__":
-    articles = fetch_substack()
-    articles_list = list(articles)  # Convert generator to list
-    add_to_db(articles_list)
+    feed_urls = ["https://addyo.substack.com/feed", "https://blog.bytemonk.io/feed"]
+    articles = fetch_rss_feeds(feed_urls)
+    add_to_db(articles)
     check_articles()
