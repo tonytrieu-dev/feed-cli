@@ -11,8 +11,8 @@ def get_db_connection():
 
 if __name__ == '__main__':
     try:
-        conn = get_db_connection()
+        connection = get_db_connection()
         print("Connection successful with psycopg2!")
-        conn.close()
+        connection.close()
     except Exception as e:
         print(f"Connection failed: {e}")

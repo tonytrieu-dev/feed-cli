@@ -36,15 +36,8 @@ def check_articles():
     connection = get_db_connection()
     cursor = connection.cursor()
     cursor.execute("SELECT title, url FROM articles")
-    articles = cursor.fetchall()
-    for article in articles:
+    all_articles = cursor.fetchall()
+    for article in all_articles:
         print(f"Title: {article[0]}, URL: {article[1]}")
     cursor.close()
     connection.close()
-
-
-if __name__ == "__main__":
-    feed_urls = ["https://addyo.substack.com/feed", "https://blog.bytemonk.io/feed"]
-    articles = fetch_rss_feeds(feed_urls)
-    add_to_db(articles)
-    check_articles()

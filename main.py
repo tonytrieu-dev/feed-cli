@@ -1,4 +1,4 @@
-from cli import cli, ping, help
+from cli import cli
 
 def main():
     print("Hello from the tech news aggregator!")

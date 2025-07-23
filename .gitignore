@@ -7,3 +7,4 @@
 __pycache__/cli.cpython-313.pyc
 pg_hba.conf
 __pycache__/db.cpython-313.pyc
+__pycache__/aggregator.cpython-313.pyc
