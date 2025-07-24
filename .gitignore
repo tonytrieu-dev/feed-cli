@@ -8,3 +8,9 @@ __pycache__/cli.cpython-313.pyc
 pg_hba.conf
 __pycache__/db.cpython-313.pyc
 __pycache__/aggregator.cpython-313.pyc
+docker-compose.yml
+Tech News Aggregator CLI 2-Week Plan.markdown
+__pycache__/config.cpython-313.pyc
+__pycache__/logger.cpython-313.pyc
+__pycache__/db.cpython-312.pyc
+__pycache__/cli.cpython-312.pyc
