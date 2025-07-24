@@ -1,4 +1,4 @@
-﻿# Tech News Bot
+﻿# Tech News Automator
 
 A Python-based bot for aggregating and sharing technology news.
 
