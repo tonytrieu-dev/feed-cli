@@ -1,15 +1,14 @@
-﻿# Tech News Automator
+﻿# Feed CLI
 
-A Python-based bot for aggregating and sharing technology news.
+A Python-based CLI for aggregating RSS feeds.
 
 ## Tech Stack
 
-- **Python 3.13+** - Core runtime
+- **Python 3.9+** - Core runtime
 - **feedparser** - RSS feed parsing
 - **aiohttp** - Async HTTP client
 - **Redis** - Caching and data storage
 - **PostgreSQL** - Database (psycopg2)
-- **Google APIs** - Integration with Google services
 
 ## Features
 
@@ -17,7 +16,6 @@ A Python-based bot for aggregating and sharing technology news.
 - Async operations for performance
 - Redis caching
 - PostgreSQL database support
-- Google API integration
 
 ## Installation
 
@@ -33,10 +31,9 @@ A Python-based bot for aggregating and sharing technology news.
 
 ## Requirements
 
-- Python 3.13 or higher
+- Python 3.9 or higher
 - Redis server
 - PostgreSQL database
-- Google API credentials (if using Google services)
 
 ## Development
 
