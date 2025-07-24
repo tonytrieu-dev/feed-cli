@@ -1,4 +1,4 @@
-﻿# Feed CLI
+﻿# RSS Feed CLI
 
 A Python-based CLI for aggregating RSS feeds.
 
