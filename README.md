@@ -4,7 +4,7 @@ A Python-based CLI for aggregating RSS feeds and more.
 
 ## Tech Stack
 
-- **Python 3.9+** - Core runtime
+- **Python 3.13.1+** - Core runtime
 - **feedparser** - RSS feed parsing
 - **aiohttp** - Async HTTP client
 - **Redis** - Caching and data storage
@@ -31,7 +31,7 @@ A Python-based CLI for aggregating RSS feeds and more.
 
 ## Requirements
 
-- Python 3.9 or higher
+- Python 3.13.1 or higher
 - Redis server
 - PostgreSQL database
 
