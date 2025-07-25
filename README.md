@@ -1,10 +1,10 @@
 ﻿# Flexible CLI
 
-A Python-based CLI for aggregating RSS feeds and more.
+A Python-based CLI for aggregating RSS feeds and pulling job postings from HackerNews.
 
 ## Tech Stack
 
-- **Python 3.13.1+** - Core runtime
+- **Python 3.13** - Core runtime
 - **feedparser** - RSS feed parsing
 - **aiohttp** - Async HTTP client
 - **Redis** - Caching and data storage
@@ -31,7 +31,7 @@ A Python-based CLI for aggregating RSS feeds and more.
 
 ## Requirements
 
-- Python 3.13.1 or higher
+- Python 3.13 or higher
 - Redis server
 - PostgreSQL database
 
