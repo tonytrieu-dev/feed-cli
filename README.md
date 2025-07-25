@@ -1,6 +1,6 @@
-﻿# RSS Feed CLI
+﻿# Flexible CLI
 
-A Python-based CLI for aggregating RSS feeds.
+A Python-based CLI for aggregating RSS feeds and more.
 
 ## Tech Stack
 
