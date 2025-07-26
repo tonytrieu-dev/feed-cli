@@ -1,15 +1,14 @@
 import psycopg2
 from psycopg2 import pool
 from contextlib import contextmanager
-from functools import wraps
 import logging
-from config import Config, require_config
+from config import Config
+from decorators import require_config, with_database
 
 logger = logging.getLogger(__name__)
 
 # Connection pool for better performance
 connection_pool = None
-
 
 @require_config('DB_NAME', 'DB_USER', 'DB_PASSWORD', 'DB_HOST', 'DB_PORT')
 def init_connection_pool(minconn=1, maxconn=10):
@@ -43,32 +42,9 @@ def get_db_connection():
         pool.putconn(connection)
 
 
-def with_database(func):
-    """Decorator to automatically handle database connections."""
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        with get_db_connection() as connection:
-            return func(connection, *args, **kwargs)
-    return wrapper
-
-
-def with_retry(max_attempts=3):
-    """Decorator to retry database operations on failure."""
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            for attempt in range(max_attempts):
-                try:
-                    return func(*args, **kwargs)
-                except psycopg2.OperationalError as e:
-                    if attempt == max_attempts - 1:
-                        raise
-                    logger.warning(f"Database operation failed, retrying... (attempt {attempt + 1}/{max_attempts})")
-            return None
-        return wrapper
-    return decorator
-
-
+# with_database decorator now imported from decorators.py
+# Note: with_retry decorator moved to utils.py for centralized use
+# Import from utils.py when needed for database-specific retry logic
 if __name__ == '__main__':
     try:
         connection = get_db_connection()

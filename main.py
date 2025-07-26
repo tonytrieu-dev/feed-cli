@@ -6,13 +6,10 @@ logger = setup_logging('main')
 
 
 def main():
-    logger.info("Starting Tech News Aggregator...")
-    
     try:
         # Run the CLI
         cli()
     except KeyboardInterrupt:
-        logger.info("Application interrupted by user")
         sys.exit(0)
     except Exception as e:
         logger.error(f"Unexpected error: {e}")

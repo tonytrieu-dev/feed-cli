@@ -1,7 +1,6 @@
 import logging
 import logging.handlers
 import os
-from functools import wraps
 from typing import Callable
 
 def setup_logging(name: str = None, level: str = 'INFO') -> logging.Logger:
@@ -33,23 +32,3 @@ def setup_logging(name: str = None, level: str = 'INFO') -> logging.Logger:
     logger.addHandler(file_handler)
     
     return logger
-
-def log_function_call(logger: logging.Logger):
-    """Decorator to log function calls with arguments."""
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            func_args = ', '.join([repr(arg) for arg in args])
-            func_kwargs = ', '.join([f"{k}={v!r}" for k, v in kwargs.items()])
-            all_args = ', '.join(filter(None, [func_args, func_kwargs]))
-            
-            logger.debug(f"Calling {func.__name__}({all_args})")
-            try:
-                result = func(*args, **kwargs)
-                logger.debug(f"{func.__name__} returned {result!r}")
-                return result
-            except Exception as e:
-                logger.error(f"{func.__name__} raised {e.__class__.__name__}: {e}")
-                raise
-        return wrapper
-    return decorator

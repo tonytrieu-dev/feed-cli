@@ -1,7 +1,18 @@
 [project]
 name = "tech-news-bot"
 version = "0.1.0"
-description = "Add your description here"
+description = "Tech News Aggregator with HackerNews job scraping"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "click>=8.1.0",
+    "psycopg2-binary>=2.9.0",
+    "feedparser>=6.0.0",
+    "tabulate>=0.9.0",
+    "python-dotenv>=1.0.0",
+    "redis>=6.2.0",
+    "schedule>=1.2.0",
+    "requests>=2.31.0",
+    "beautifulsoup4>=4.12.0",
+    "python-json-logger>=2.0.0",
+]

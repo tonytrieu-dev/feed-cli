@@ -1,5 +1,4 @@
 import os
-from functools import wraps
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -19,20 +18,34 @@ class Config:
     # Feed URLs
     DEFAULT_FEED_URLS = [
         "https://addyo.substack.com/feed",
-        "https://blog.bytemonk.io/feed"
+        "https://blog.bytemonk.io/feed",
+        "https://blog.codingconfessions.com/feed",
+        "https://betterengineers.substack.com/feed",
+        "https://newsletter.pragmaticengineer.com/feed",
+        "https://refactoring.fm/feed",
+        "https://blog.bytebytego.com/feed"
     ]
+    
+    # HackerNews Job Posting settings
+    HN_BASE_URL = "https://hacker-news.firebaseio.com/v0"
+    HN_JOB_KEYWORDS = ["intern", "internship", "new grad", "junior", "entry level", 
+                       "university", "student", "recent graduate"]
+    HN_JOB_FETCH_LIMIT = 50
+    HN_LOOKBACK_DAYS = 7  # Check last 7 days of "Who's Hiring" posts
+    AGGREGATION_INTERVAL_MINUTES = 60
+    
+    # HackerNews API rate limiting
+    HN_API_DELAY = 0.5  # Delay between API calls in seconds
+    HN_MAX_COMMENTS_PER_POST = 500  # Maximum comments to fetch per post
+    HN_CACHE_TTL = 3600  # Cache TTL for HN posts (1 hour)
+    
+    # Redis configuration
+    REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+    REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
+    REDIS_DB = int(os.getenv("REDIS_DB", "0"))
+    
+    # Job filtering configuration
+    JOB_MIN_TEXT_LENGTH = 100  # Minimum text length to consider as valid job posting
+    JOB_MAX_KEYWORDS = 20  # Maximum keywords to extract per job
 
-def require_config(*config_keys):
-    """Decorator to ensure required configuration values are present."""
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            missing = []
-            for key in config_keys:
-                if not getattr(Config, key, None):
-                    missing.append(key)
-            if missing:
-                raise ValueError(f"Missing required configuration: {', '.join(missing)}")
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
+# require_config decorator moved to decorators.py for centralized use

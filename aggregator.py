@@ -3,37 +3,14 @@ import logging
 from datetime import datetime
 from typing import Generator, List, Dict, Any
 from urllib.parse import urlparse
-from functools import wraps
-import time
-from db import get_db_connection, with_database, with_retry
+from db import get_db_connection, with_database
 from config import Config
+from decorators import timeit, validate_feed_url, with_retry
 
 logger = logging.getLogger(__name__)
 
-def timeit(func):
-    """Decorator to measure function execution time."""
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        start = time.time()
-        result = func(*args, **kwargs)
-        end = time.time()
-        logger.info(f"{func.__name__} took {end - start:.2f} seconds")
-        return result
-    return wrapper
 
-
-def validate_feed_url(func):
-    """Decorator to validate feed URLs before processing."""
-    @wraps(func)
-    def wrapper(feed_urls, *args, **kwargs):
-        validated_urls = []
-        for url in feed_urls:
-            if url.startswith(('http://', 'https://')):
-                validated_urls.append(url)
-            else:
-                logger.warning(f"Invalid URL skipped: {url}")
-        return func(validated_urls, *args, **kwargs)
-    return wrapper
+# validate_feed_url decorator now imported from decorators.py
 
 
 def article_generator(feed_url: str) -> Generator[Dict[str, Any], None, None]:
