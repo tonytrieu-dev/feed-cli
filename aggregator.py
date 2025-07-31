@@ -10,9 +10,6 @@ from decorators import timeit, validate_feed_url, with_retry
 logger = logging.getLogger(__name__)
 
 
-# validate_feed_url decorator now imported from decorators.py
-
-
 def article_generator(feed_url: str) -> Generator[Dict[str, Any], None, None]:
     """Generator that yields articles from a single RSS feed."""
     try:

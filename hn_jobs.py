@@ -80,11 +80,16 @@ class HNJobScraper:
                 if 'who is hiring?' in title or 'who\'s hiring?' in title:
                     # Extract month/year from title
                     month_year = self._extract_month_year(story.get('title', ''))
-                    story['month_year'] = month_year
-                    story['url'] = self.HN_ITEM_URL.format(story_id)
-                    story['source_type'] = 'community_thread'
-                    hiring_posts.append(story)
-                    logger.info(f"Found community hiring thread: {story.get('title')}")
+                    
+                    # Filter for recent posts (2025+) 
+                    if month_year and self._is_recent_hiring_post(month_year):
+                        story['month_year'] = month_year
+                        story['url'] = self.HN_ITEM_URL.format(story_id)
+                        story['source_type'] = 'community_thread'
+                        hiring_posts.append(story)
+                        logger.info(f"Found recent community hiring thread: {story.get('title')}")
+                    else:
+                        logger.info(f"Skipping old hiring thread: {story.get('title')} ({month_year})")
                     
                     if len(hiring_posts) >= limit:
                         break
@@ -132,6 +137,22 @@ class HNJobScraper:
         if match:
             return f"{match.group(1)} {match.group(2)}"
         return None
+    
+    def _is_recent_hiring_post(self, month_year: str) -> bool:
+        """Check if a hiring post is from 2025 or later."""
+        if not month_year:
+            return False
+        
+        try:
+            # Extract year from "Month YYYY" format
+            parts = month_year.split()
+            if len(parts) >= 2:
+                year = int(parts[-1])
+                return year >= 2025
+        except (ValueError, IndexError):
+            pass
+        
+        return False
     
     @timeit
     def fetch_job_comments(self, post_id: int, max_comments: int = 500) -> List[Dict]:
@@ -406,6 +427,25 @@ class HNJobScraper:
         
         return None
     
+    def _extract_yc_cohort_year(self, company_name: str) -> Optional[int]:
+        """Extract YC cohort year from company name."""
+        if not company_name:
+            return None
+        
+        # Look for patterns like "YC S24", "YC W23", "YC F24", etc.
+        import re
+        match = re.search(r'YC\s*([SWF])(\d{2})', company_name)
+        if match:
+            season, year_suffix = match.groups()
+            # Convert 2-digit year to 4-digit year
+            year_suffix = int(year_suffix)
+            if year_suffix <= 30:  # Assume 00-30 means 2000-2030
+                return 2000 + year_suffix
+            else:  # 31-99 means 1931-1999 (unlikely for YC but just in case)
+                return 1900 + year_suffix
+        
+        return None
+    
     def _extract_keywords(self, text: str) -> List[str]:
         """Extract relevant keywords from job posting."""
         # Technology keywords to look for
@@ -589,6 +629,48 @@ class HNJobScraper:
         return stats
 
 
+def get_yc_cohort_stats() -> Dict:
+    """Get statistics about YC cohorts in the database."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        
+        # Extract YC cohort years from company names
+        cursor.execute("""
+            SELECT 
+                CASE 
+                    WHEN company ~ 'YC\\s*[SWF](\\d{2})' THEN 
+                        CASE 
+                            WHEN SUBSTRING(company FROM 'YC\\s*[SWF](\\d{2})')::int <= 30 
+                            THEN 2000 + SUBSTRING(company FROM 'YC\\s*[SWF](\\d{2})')::int
+                            ELSE 1900 + SUBSTRING(company FROM 'YC\\s*[SWF](\\d{2})')::int
+                        END
+                    ELSE NULL
+                END as yc_year,
+                COUNT(*) as job_count
+            FROM jobs 
+            WHERE company IS NOT NULL AND company ~ 'YC\\s*[SWF]\\d{2}'
+            GROUP BY yc_year
+            ORDER BY yc_year DESC
+        """)
+        
+        yc_cohorts = cursor.fetchall()
+        
+        # Get total YC companies
+        cursor.execute("""
+            SELECT COUNT(*) 
+            FROM jobs 
+            WHERE company IS NOT NULL AND company ~ 'YC\\s*[SWF]\\d{2}'
+        """)
+        
+        total_yc_jobs = cursor.fetchone()[0]
+        
+        cursor.close()
+        return {
+            'yc_cohorts': yc_cohorts,
+            'total_yc_jobs': total_yc_jobs
+        }
+
+
 # CLI helper functions
 def search_jobs(filters: Dict) -> List[Dict]:
     """Search jobs in the database with filters."""
@@ -624,6 +706,19 @@ def search_jobs(filters: Dict) -> List[Dict]:
         if filters.get('days'):
             query += " AND posted_at >= CURRENT_TIMESTAMP - INTERVAL '%s days'"
             params.append(filters['days'])
+        
+        if filters.get('year'):
+            query += " AND EXTRACT(YEAR FROM posted_at) = %s"
+            params.append(filters['year'])
+        
+        if filters.get('yc_cohort_year'):
+            # Filter by YC cohort year extracted from company name
+            query += " AND company ~ %s"
+            # Regex pattern to match YC cohort year in company name
+            yc_year = filters['yc_cohort_year']
+            year_suffix = str(yc_year)[-2:]  # Get last 2 digits of year
+            pattern = rf'YC\s*[SWF]{year_suffix}'
+            params.append(pattern)
         
         query += " ORDER BY posted_at DESC"
         

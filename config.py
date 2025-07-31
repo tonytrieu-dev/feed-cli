@@ -9,7 +9,7 @@ class Config:
     DB_USER = os.getenv("DB_USER", "postgres")
     DB_PASSWORD = os.getenv("DB_PASSWORD", "secret")
     DB_HOST = os.getenv("DB_HOST", "127.0.0.1")
-    DB_PORT = int(os.getenv("DB_PORT", "5433"))
+    DB_PORT = int(os.getenv("DB_PORT", "5433")) # Change back to 5433 for local Docker setup
     
     # RSS Feed configurations
     DEFAULT_FETCH_LIMIT = 10
@@ -47,5 +47,3 @@ class Config:
     # Job filtering configuration
     JOB_MIN_TEXT_LENGTH = 100  # Minimum text length to consider as valid job posting
     JOB_MAX_KEYWORDS = 20  # Maximum keywords to extract per job
-
-# require_config decorator moved to decorators.py for centralized use

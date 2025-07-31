@@ -10,7 +10,7 @@ import hashlib
 import schedule
 import time
 from datetime import datetime
-from hn_jobs import HNJobScraper, search_jobs, get_job_stats
+from hn_jobs import HNJobScraper, search_jobs, get_job_stats, get_yc_cohort_stats
 from utils import get_redis_client
 from decorators import handle_errors
 
@@ -242,12 +242,21 @@ def aggregate_periodically():
 @cli.command()
 @click.option('--posts', '-p', default=1, type=int, help='Number of hiring posts to fetch')
 @click.option('--force', is_flag=True, help='Force refresh, ignore cache')
+@click.option('--clear-old', is_flag=True, help='Clear jobs older than 2025 before fetching')
 @handle_errors
-def fetch_jobs(posts, force):
+def fetch_jobs(posts, force, clear_old):
     """Fetch job postings from HackerNews Who's Hiring threads."""
     if force:
         # Clear cache
         redis_client.delete("hn:whos_hiring_posts")
+    
+    if clear_old:
+        # Clear jobs older than 2025
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM jobs WHERE EXTRACT(YEAR FROM posted_at) < 2025")
+            deleted_count = cursor.rowcount
+            click.echo(f"🗑️ Cleared {deleted_count} jobs older than 2025")
     
     scraper = HNJobScraper()
     click.echo(f"Fetching jobs from {posts} most recent 'Who is hiring?' posts...")
@@ -272,11 +281,13 @@ def fetch_jobs(posts, force):
 @click.option('--company', '-c', help='Filter by company name')
 @click.option('--location', '-l', help='Filter by location')
 @click.option('--keyword', '-k', multiple=True, help='Filter by keywords (can use multiple)')
-@click.option('--days', '-d', default=30, type=int, help='Show jobs from last N days')
+@click.option('--days', '-d', default=90, type=int, help='Show jobs from last N days (default: 90 for 2025+ jobs)')
 @click.option('--limit', default=20, type=int, help='Maximum number of jobs to show')
 @click.option('--format', type=click.Choice(['table', 'detailed', 'json']), default='table')
+@click.option('--year', type=int, help='Filter by job posting year (e.g., 2025, 2026)')
+@click.option('--yc-cohort', type=int, help='Filter by YC cohort year (e.g., 2025, 2026)')
 @handle_errors
-def jobs(internship, new_grad, remote, company, location, keyword, days, limit, format):
+def jobs(internship, new_grad, remote, company, location, keyword, days, limit, format, year, yc_cohort):
     """Display job postings with various filters."""
     filters = {
         'internship': internship,
@@ -286,7 +297,9 @@ def jobs(internship, new_grad, remote, company, location, keyword, days, limit, 
         'location': location,
         'keywords': list(keyword) if keyword else None,
         'days': days,
-        'limit': limit
+        'limit': limit,
+        'year': year,
+        'yc_cohort_year': yc_cohort
     }
     
     jobs = search_jobs(filters)
@@ -378,6 +391,27 @@ def job_stats():
             tablefmt='simple'
         )
         click.echo(day_table)
+
+
+@cli.command()
+@handle_errors
+def yc_cohorts():
+    """Display YC cohort statistics."""
+    stats = get_yc_cohort_stats()
+    
+    click.echo("\n--- YC Cohort Statistics ---")
+    click.echo(f"Total jobs from YC companies: {stats['total_yc_jobs']}")
+    
+    if stats['yc_cohorts']:
+        click.echo("\n--- Jobs by YC Cohort Year ---")
+        cohort_table = tabulate(
+            [(row[0], row[1]) for row in stats['yc_cohorts']],
+            headers=['YC Cohort Year', 'Jobs'],
+            tablefmt='simple'
+        )
+        click.echo(cohort_table)
+    else:
+        click.echo("No YC companies found in database.")
 
 
 @cli.command()
